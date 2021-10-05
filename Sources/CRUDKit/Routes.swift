@@ -51,4 +51,31 @@ extension RoutesBuilder {
                 
         custom?(idRoutes, controller)
     }
+    
+    // MARK: Siblings
+
+    public func crud<T: Model & CRUDModel, SiblingT: Model, ThroughT: Model>(_ endpoint: String, siblings: T.Type, on siblingController: CRUDController<SiblingT>, through: ThroughT.Type, via keypath: KeyPath<SiblingT, SiblingsProperty<SiblingT, T, ThroughT>>, custom: ((RoutesBuilder, CRUDSiblingsController<T, SiblingT, ThroughT>) -> ())? = nil) where T.IDValue: LosslessStringConvertible {
+        let modelComponent = PathComponent(stringLiteral: endpoint)
+        let idComponent = PathComponent(stringLiteral: ":\(endpoint)")
+        let routes = self.grouped(modelComponent)
+        let idRoutes = routes.grouped(idComponent)
+        
+        let controller = CRUDSiblingsController<T, SiblingT, ThroughT>(idComponentKey: endpoint, siblingIdComponentKey: siblingController.idComponentKey, siblings: keypath)
+        controller.setup(self, on: endpoint)
+                
+        custom?(idRoutes, controller)
+    }
+
+    public func crud<T: Model & CRUDModel & Patchable, SiblingT: Model, ThroughT: Model>(_ endpoint: String, siblings: T.Type, on siblingController: CRUDController<SiblingT>, via keypath: KeyPath<SiblingT, SiblingsProperty<SiblingT, T, ThroughT>>, custom: ((RoutesBuilder, CRUDSiblingsController<T, SiblingT, ThroughT>) -> ())? = nil) where T.IDValue: LosslessStringConvertible {
+        let modelComponent = PathComponent(stringLiteral: endpoint)
+        let idComponent = PathComponent(stringLiteral: ":\(endpoint)")
+        let routes = self.grouped(modelComponent)
+        let idRoutes = routes.grouped(idComponent)
+        
+        let controller = CRUDSiblingsController<T, SiblingT, ThroughT>(idComponentKey: endpoint, siblingIdComponentKey: siblingController.idComponentKey, siblings: keypath)
+        controller.setup(self, on: endpoint)
+                
+        custom?(idRoutes, controller)
+    }
+
 }

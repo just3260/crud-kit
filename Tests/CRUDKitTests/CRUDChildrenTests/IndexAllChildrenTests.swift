@@ -26,7 +26,7 @@ final class IndexAllChildrenTests: ApplicationXCTestCase {
                 XCTAssertGreaterThan($0.count, 0)
                 XCTAssertEqual($0.count, 1)
                 XCTAssertNotEqual($0.count, 2)
-                XCTAssertEqual($0[0].title, "Important")
+                XCTAssertContains($0[0].title, "Todo")
             }
         })
     }

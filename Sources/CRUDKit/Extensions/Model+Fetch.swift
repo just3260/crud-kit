@@ -10,4 +10,8 @@ extension Model where IDValue: LosslessStringConvertible {
         let id = Self.getID(from: key, on: request)
         return Self.find(id, on: request.db).unwrap(or: Abort(.notFound))
     }
+    
+    internal static func getAll(from ids: [Self.IDValue], on request: Request) -> EventLoopFuture<[Self]> {
+        return Self.query(on: request.db).filter(\._$id ~~ ids).all()
+    }
 }

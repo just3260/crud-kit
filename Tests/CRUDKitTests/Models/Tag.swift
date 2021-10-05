@@ -16,6 +16,9 @@ final class Tag: Model, Content {
     @Parent(key: "todo_id")
     var todo: Todo
     
+    @Siblings(through: PlanetTag.self, from: \.$tag, to: \.$planet)
+    var planets: [Planet]
+    
     init(id: Int? = nil, title: String, todo_id: Todo.IDValue?) {
         self.id = id
         self.title = title
@@ -77,7 +80,7 @@ extension Tag {
     static func seed(on database: Database) throws {
         let todos = try Todo.query(on: database).all().wait()
         try todos.forEach { todo in
-            try todo.$tags.create(Tag(title: "Important", todo_id: todo.id!), on: database).wait()
+            try todo.$tags.create(Tag(title: "Important From Todo \(todo.id!)", todo_id: todo.id!), on: database).wait()
         }
     }
 }

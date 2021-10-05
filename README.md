@@ -1,7 +1,5 @@
 # CRUDKit for Vapor 4
 
-**Not actively maintained** (see https://github.com/simonedelmann/crud-kit/issues/9)
-
 We all write CRUD (Create-Read-Update-Delete) routes all the time. The intention of this package is to reduce repeating code and to provide a fast start for an API. 
 
 ## Contribution
@@ -202,9 +200,13 @@ app.crud("todos", model: Todo.self) { routes, _ in
 }
 ```
 
-### Relationship support
+## Relationship support
 
-**Experimental** Currently only Children relations are supported. See example below...
+**Experimental** 
+
+### Children
+
+See example below...
 
 ```swift
 // Todo -> Tag
@@ -318,4 +320,63 @@ Then you can create a child without parent id within payload.
 {
     title: "Foo"
 }
+```
+
+### Siblings
+
+See example below...
+
+```swift
+// Planet <-> Tag
+final class Planet: Model, Content {
+    @Siblings(through: PlanetTag.self, from: \.$planet, to: \.$tag)
+    var tags: [Tag]
+    
+    // ...
+}
+
+final class Tag: Model, Content {
+    @Siblings(through: PlanetTag.self, from: \.$tag, to: \.$planet)
+    var planets: [Planet]
+    
+    // ...
+}
+
+
+final class PlanetTag: Model {
+    @Parent(key: "planet_id")
+    var planet: Planet
+
+    @Parent(key: "tag_id")
+    var tag: Tag
+
+    // ...
+}
+
+
+extension Todo: CRUDModel { }
+extension Tag: CRUDModel { }
+
+// routes.swift
+app.crud("planet", model: Planet.self) { routes, parentController in
+    routes.crud("tags", siblings: Tag.self, on: parentController, via: \.$tags)
+}
+```
+
+This will register CRUD routes for tags:
+
+```
+GET /planets/:planets/tags              # get all tags
+GET /planets/:planets/tags/:tags        # get tag
+PUT /planets/:planets/tags              # attach tag
+DELETE /planets/:planets/tags           # detach tag
+```
+
+#### Notes on attaching/detaching models
+
+Take note that the attach and detach calls does not include the id of the tag. But instead, the call has been extended to use the body in order to specify which ids of tags to be attached for planet. You can pass in multiple tag ids in an array instead of just passing one id at a time.
+```
+[
+    1, 2, 3 
+]
 ```
